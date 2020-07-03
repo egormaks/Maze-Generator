@@ -12,8 +12,8 @@ public class InitFrame extends ListenerPanel {
     public InitFrame() {
         this.setLayout(new GridLayout(2, 1, 0, 10));
         JPanel dimensions = new JPanel();
-        JTextField width = new JTextField("Width");
-        JTextField height = new JTextField("Height");
+        JTextField width = new JTextField("5");
+        JTextField height = new JTextField("5");
 
         dimensions.add(width);
         dimensions.add(height);

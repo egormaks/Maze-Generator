@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -19,7 +21,7 @@ public class Driver extends JPanel  {
         mazePanels[0] = new MazePanel("Prim");
         mazePanels[1] = new MazePanel("Kruskal");
         mazePanels[2] = new MazePanel("Eller");
-        mazePanels[3] = new MazePanel("Recursive Backtracking");
+        mazePanels[3] = new MazePanel("Recursive Depth First");
     }
 
     public static void main(String[] args) {
@@ -39,6 +41,7 @@ public class Driver extends JPanel  {
 
         public MazePanel(String name) {
             this.setName(name);
+            this.setSize(100, 100);
         }
 
         @Override
@@ -51,17 +54,46 @@ public class Driver extends JPanel  {
         }
 
         private void createMaze(int width, int height) {
-            int grid[][] = new int[height][width];
+            int grid[][] = new int[2 * height + 1][2 * width + 1];
+            for (int i = 0; i < grid.length; i++) {
+                for (int j = 0; j < grid[0].length; j++) {
+                    System.out.printf("(%d, %d) ", j, i);
+                    grid[i][j] = 1;
+                }
+            }
             if (this.getName().equals("Prim")) {
                 grid = MazeAlgorithms.generatePrim(grid);
             } else if (this.getName().equals("Kruskal")) {
                 grid = MazeAlgorithms.generateKruskal(grid);
             } else if (this.getName().equals("Eller")) {
                 grid = MazeAlgorithms.generateEller(grid);
-            } else if (this.getName().equals("Recursive Backtracking")) {
-                grid = MazeAlgorithms.generateBacktrack(grid);
+            } else if (this.getName().equals("Recursive Depth First")) {
+                int startX = (int)(Math.random() * grid[0].length);
+                if (startX % 2 == 0) {
+                    if (startX == 0) {
+                        startX++;
+                    } else if (startX == grid[0].length - 1) {
+                        startX--;
+                    } else startX--;
+                }
+                int startY = (int)(Math.random() * grid.length);
+                if (startY % 2 == 0) {
+                    if (startY == 0) {
+                        startY++;
+                    } else if (startX == grid.length - 1) {
+                        startY--;
+                    } else startY--;
+                }
+                grid[startY][startX] = 0;
+                MazeAlgorithms.generateDepthFirstRecursive(grid, startX, startY);
             }
-            // display maze grid
+            int i,j;
+            for (i = 0; i < grid.length; i++) {
+                for (j = 0; j < grid[0].length; j++) {
+                    System.out.print(grid[i][j] + " ");
+                }
+                System.out.println();
+            }
         }
     }
 
