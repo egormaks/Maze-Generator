@@ -37,8 +37,9 @@ public class Driver extends JPanel  {
         }
     }
 
-    class MazePanel extends JPanel implements PropertyChangeListener {
-
+    static class MazePanel extends JPanel implements PropertyChangeListener {
+        private static int startX;
+        private static int startY;
         public MazePanel(String name) {
             this.setName(name);
             this.setSize(100, 100);
@@ -60,7 +61,7 @@ public class Driver extends JPanel  {
                     grid[i][j] = 1;
                 }
             }
-            int startX = (int)(Math.random() * grid[0].length);
+            startX = (int)(Math.random() * grid[0].length);
             if (startX % 2 == 0) {
                 if (startX == 0) {
                     startX++;
@@ -68,7 +69,7 @@ public class Driver extends JPanel  {
                     startX--;
                 } else startX--;
             }
-            int startY = (int)(Math.random() * grid.length);
+            startY = (int)(Math.random() * grid.length);
             if (startY % 2 == 0) {
                 if (startY == 0) {
                     startY++;
@@ -76,20 +77,24 @@ public class Driver extends JPanel  {
                     startY--;
                 } else startY--;
             }
-            grid[startY][startX] = 0;
             if (this.getName().equals("Prim")) {
+                grid[startY][startX] = 0;
                 MazeAlgorithms.generatePrim(grid, startX, startY);
             } else if (this.getName().equals("Kruskal")) {
-                grid = MazeAlgorithms.generateKruskal(grid);
+                MazeAlgorithms.generateKruskal(grid);
             } else if (this.getName().equals("Eller")) {
-                grid = MazeAlgorithms.generateEller(grid);
+                MazeAlgorithms.generateEller(grid);
             } else if (this.getName().equals("Recursive Depth First")) {
+                grid[startY][startX] = 0;
                 MazeAlgorithms.generateDepthFirstRecursive(grid, startX, startY);
             }
             int i,j;
             for (i = 0; i < grid.length; i++) {
                 for (j = 0; j < grid[0].length; j++) {
-                    System.out.print(grid[i][j] + " ");
+                    char c;
+                    if (grid[i][j] == 0) c = ' ';
+                    else c = '#';
+                    System.out.print(c + " ");
                 }
                 System.out.println();
             }
