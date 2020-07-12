@@ -5,41 +5,60 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 
-public class Driver extends JPanel  {
-    private static final int CELL_X = 10;
-    private static final int CELL_Y = 10;
+public class Driver extends JFrame  {
+    private static final int DEFAULT_TEXT_HEIGHT = 10;
     private static final int NO_ALGOS = 4;
-    private static final String GENERATE_MAZE = "Received dim, generate maze";
 
-    private int width;
-    private int height;
     private MazePanel[] mazePanels;
 
     public Driver() {
         this.setName("Simulator");
-        mazePanels = new MazePanel[NO_ALGOS];
-        mazePanels[0] = new MazePanel("Prim");
-        mazePanels[1] = new MazePanel("Kruskal");
-        mazePanels[2] = new MazePanel("Eller");
-        mazePanels[3] = new MazePanel("Recursive Depth First");
+        this.setLayout(new GridLayout(2, NO_ALGOS + 1, 30, 0));
+        initializeAlgos();
+
+        InitFrame init = new InitFrame();
+        for (int i = 0; i < NO_ALGOS; i++) {
+            init.addPropertyChangeListener(this.mazePanels[i]);
+        }
+        this.add(init);
+        for (int i = 0; i < NO_ALGOS; i++) {
+            JLabel label = new JLabel(mazePanels[i].getName());
+            label.setPreferredSize(new Dimension(mazePanels[i].getWidth(), DEFAULT_TEXT_HEIGHT));
+            this.add(label);
+        }
+        for (int i = 0; i < NO_ALGOS; i++) {
+            this.add(mazePanels[i]);
+        }
+
+        this.setPreferredSize(new Dimension(5 * mazePanels[0].getWidth(), DEFAULT_TEXT_HEIGHT
+                + 2 * mazePanels[0].getHeight()));
+
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    private void initializeAlgos() {
+        this.mazePanels = new MazePanel[NO_ALGOS];
+        this.mazePanels[1] = new MazePanel("Kruskal");
+        this.mazePanels[0] = new MazePanel("Prim");
+        this.mazePanels[2] = new MazePanel("Eller");
+        this.mazePanels[3] = new MazePanel("Depth First");
     }
 
     public static void main(String[] args) {
-        InitFrame init = new InitFrame();
         Driver driver = new Driver();
-        for (int i = 0; i < NO_ALGOS; i++) {
-            init.addPropertyChangeListener(driver.mazePanels[i]);
-        }
-        boolean running = true;
+        driver.pack();
         driver.setVisible(true);
+        boolean running = true;
         while (running) {
 
         }
     }
 
     static class MazePanel extends JPanel implements PropertyChangeListener {
-        private static int startX;
-        private static int startY;
+        private int[][] grid;
+        private static final int DEFAULT_CELL_SIZE = 10;
+        private long timeTaken;
+
         public MazePanel(String name) {
             this.setName(name);
             this.setSize(100, 100);
@@ -50,18 +69,50 @@ public class Driver extends JPanel  {
             if (ev.getPropertyName().equals(InitFrame.GENERATE)) {
                 System.out.println(this.getName() + " received data.");
                 List<Integer> dim = (List<Integer>) ev.getNewValue();
-                createMaze(dim.get(0), dim.get(1));
+                timeTaken = createMaze(dim.get(0), dim.get(1));
+                this.repaint();
             }
         }
 
-        private void createMaze(int width, int height) {
-            int grid[][] = new int[2 * height + 1][2 * width + 1];
-            for (int i = 0; i < grid.length; i++) {
-                for (int j = 0; j < grid[0].length; j++) {
-                    grid[i][j] = 1;
+        @Override
+        public void paintComponent(Graphics g) {
+            if (grid != null) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                int i, j;
+
+                // w|h = 2^i * 5
+                // i = log(w|h / 5) / log(2)
+                // scale = DEFAULT_CELL_SIZE * 2 / (2 + i)
+                int xScaled = DEFAULT_CELL_SIZE * 2 / (int)(2 + Math.log(grid[0].length / 5) / Math.log(2));
+                int yScaled = DEFAULT_CELL_SIZE * 2 / (int)(2 + Math.log(grid.length / 5) / Math.log(2));
+                int scale = xScaled > yScaled ? yScaled : xScaled;
+
+                for (i = 0; i < grid.length; i++) {
+                    for (j = 0; j < grid[0].length; j++) {
+                        g2d.setColor(Color.BLACK);
+                        if (grid[i][j] == 1) {
+                            g2d.fillRect(i * scale, j * scale,
+                                    scale, scale);
+                        } else {
+                            g2d.drawRect(i * scale, j * scale,
+                                    scale, scale);
+                        }
+                    }
                 }
+                this.setSize(grid[0].length * grid[0].length * scale * 2,
+                        grid.length * grid.length * scale * 2);
+                this.repaint();
             }
-            startX = (int)(Math.random() * grid[0].length);
+        }
+
+        private long createMaze(int width, int height) {
+            long time;
+            int grid[][] = new int[2 * height + 1][2 * width + 1];
+            for (int i = 0; i < grid.length; i++)
+                for (int j = 0; j < grid[0].length; j++)
+                    grid[i][j] = 1;
+            int startX = (int)(Math.random() * grid[0].length);
             if (startX % 2 == 0) {
                 if (startX == 0) {
                     startX++;
@@ -69,7 +120,7 @@ public class Driver extends JPanel  {
                     startX--;
                 } else startX--;
             }
-            startY = (int)(Math.random() * grid.length);
+            int startY = (int)(Math.random() * grid.length);
             if (startY % 2 == 0) {
                 if (startY == 0) {
                     startY++;
@@ -77,6 +128,7 @@ public class Driver extends JPanel  {
                     startY--;
                 } else startY--;
             }
+            time = System.currentTimeMillis();
             if (this.getName().equals("Prim")) {
                 grid[startY][startX] = 0;
                 MazeAlgorithms.generatePrim(grid, startX, startY);
@@ -84,10 +136,11 @@ public class Driver extends JPanel  {
                 MazeAlgorithms.generateKruskal(grid);
             } else if (this.getName().equals("Eller")) {
                 MazeAlgorithms.generateEller(grid);
-            } else if (this.getName().equals("Recursive Depth First")) {
+            } else if (this.getName().equals("Depth First")) {
                 grid[startY][startX] = 0;
                 MazeAlgorithms.generateDepthFirstRecursive(grid, startX, startY);
             }
+            time = System.currentTimeMillis() - time;
             int i,j;
             for (i = 0; i < grid.length; i++) {
                 for (j = 0; j < grid[0].length; j++) {
@@ -98,6 +151,8 @@ public class Driver extends JPanel  {
                 }
                 System.out.println();
             }
+            this.grid = grid;
+            return time;
         }
     }
 

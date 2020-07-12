@@ -129,69 +129,87 @@ public class MazeAlgorithms {
         int setGrid[][] = new int[(grid.length - 1) / 2][(grid.length - 1) / 2];
         int setCounter = 1;
 
-        for (int i = 0; i < setGrid.length - 1; i++) {
-            // initialize all cell sets if not already in a set
-            // (since sets are indicated by a number >= 1, 0 means not a set.
+        for (int i = 0; i < setGrid.length; i++) {
+            // create row, join cells to unique set if not already.
             for (int j = 0; j < setGrid[0].length; j++) {
                 if (setGrid[i][j] == 0) {
                     setGrid[i][j] = setCounter;
                     setCounter++;
-                    int x = j * 2 + 1;
-                    int y = i * 2 + 1;
-                    grid[y][x] = 0;
                 }
+                grid[i * 2 + 1][j * 2 + 1] = 0;
             }
-            // join and create right walls
-            for (int j = 0; j < setGrid[0].length - 1; j++) {
-                boolean toJoin = RAND.nextBoolean();
-                if (setGrid[i][j] != setGrid[i][j + 1]) {
-                    for (int k = j + 1; k < setGrid[0].length - 1 && toJoin; k++) {
-                        if (setGrid[i][j] != setGrid[i][k]) {
-                            setGrid[i][k] = setGrid[i][j];
-                            toJoin = RAND.nextBoolean();
-                            int x1 = j * 2 + 1;
-                            int x2 = (j + 1) * 2 + 1;
-                            int y = i * 2 + 1;
-                            grid[y][(x1 + x2) / 2] = 0;
+            if (i < setGrid.length - 1) {
+                // create right walls, left to right
+                for (int j = 0; j < setGrid[0].length - 1; j++) {
+                    boolean toJoin = RAND.nextBoolean();
+                    int k = j + 1;
+                    while (k < setGrid[0].length && toJoin && setGrid[i][k] != setGrid[i][k - 1]) {
+                        setGrid[i][k] = setGrid[i][k - 1];
+                        int x1 = k * 2 + 1;
+                        int x2 = (k - 1) * 2 + 1;
+                        grid[2 * i + 1][(x1 + x2) / 2] = 0;
+
+                        k++;
+                        toJoin = RAND.nextBoolean();
+                    }
+                    if (k < setGrid[0].length - 1 && setGrid[i][k] == setGrid[i][k - 1]) {
+                        int x1 = k * 2 + 1;
+                        int x2 = (k - 1) * 2 + 1;
+                        grid[2 * i + 1][(x1 + x2) / 2] = 1;
+                        grid[2 * (i + 1) + 1][(x1 + x2) / 2] = 1;
+                    }
+                    j = k - 1;
+                }
+                // create bottom walls, left to right
+                for (int j = 0; j < setGrid[0].length; j++) {
+                    boolean hasExit = false;
+                    boolean genExit = RAND.nextBoolean();
+                    int k = j + 1;
+
+                    int y1 = 2 * i + 1;
+                    int y2 = 2 * (i + 1) + 1;
+                    boolean toJoin = RAND.nextBoolean();
+                    while (k < setGrid[0].length && setGrid[i][k] == setGrid[i][j] && toJoin) {
+                        if (genExit) {
+                            hasExit = true;
+                            grid[(y1 + y2) / 2][k * 2 + 1] = 0;
+                            setGrid[i + 1][k] = setGrid[i][k];
+                        }
+                        genExit = RAND.nextBoolean();
+                        k++;
+                        toJoin = RAND.nextBoolean();
+                    }
+                    if (!hasExit) {
+                        // meaning a single cell set that is the rightmost set.
+                        if (j == grid[0].length - 1) {
+                            grid[(y1 + y2) / 2][j * 2 + 1] = 0;
+                            setGrid[i + 1][j] = setGrid[i][j];
                         } else {
-                            setGrid[i][j + 1] = setGrid[i][j];
-                            j = k - 1;
-                            break;
+                            int randX = (int) ((Math.random() * (k - j)) + j);
+                            grid[(y1 + y2) / 2][randX * 2 + 1] = 0;
+                            setGrid[i + 1][randX] = setGrid[i][randX];
                         }
                     }
+                    hasExit = false;
                 }
             }
-            // randomly determine vertical connections
-            for (int j = 0; j < setGrid[0].length; j++) {
-                int maxRange = j;
-                boolean hasOneExit = false;
-                boolean createExit;
-                while (setGrid[i][maxRange] == setGrid[i][maxRange + 1]) {
-                    createExit = RAND.nextBoolean();
-                    if (createExit) {
-                        hasOneExit = true;
-                        setGrid[i + 1][j] = setGrid[i][j];
-                    } else {
-                        int x = j * 2 + 1;
-                        int y1 = i * 2 + 1;
-                        int y2 = (i + 1) * 2 + 1;
-                        grid[(y1 + y2) / 2][x] = 1;
-                    }
-                    maxRange++;
-                }
-                if (!hasOneExit) {
-                    if (j == maxRange) {
-                        setGrid[i + 1][j] = setGrid[i][j];
-                    } else {
-                        int randX = (int)((Math.random() * (maxRange - j)) + j);
-                        setGrid[i + 1][randX] = setGrid[i][randX];
-                        int x = randX * 2 + 1;
-                        int y1 = i * 2 + 1;
-                        int y2 = (i + 1) * 2 + 1;
-                        grid[(y1 + y2) / 2][x] = 0;
-                    }
-                }
+            printGrid(setGrid);
+        }
+        for (int j = 0; j < setGrid[0].length; j++) {
+            int k = j + 1;
+            while (k < setGrid[0].length && setGrid[setGrid.length - 1][k] != setGrid[setGrid.length - 1][k - 1]) {
+                setGrid[setGrid.length - 1][k] = setGrid[setGrid.length - 1][k - 1];
+                int x1 = k * 2 + 1;
+                int x2 = (k - 1) * 2 + 1;
+                grid[2 * (setGrid.length - 1) + 1][(x1 + x2) / 2] = 0;
+                k++;
             }
+            if (k < setGrid[0].length - 1 && setGrid[setGrid.length - 1][k] == setGrid[setGrid.length - 1][k - 1]) {
+                int x1 = k * 2 + 1;
+                int x2 = (k - 1) * 2 + 1;
+                grid[2 * (setGrid.length - 1) + 1][(x1 + x2) / 2] = 1;
+            }
+            j = k - 1;
         }
     }
 

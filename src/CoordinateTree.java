@@ -22,13 +22,13 @@ public class CoordinateTree {
 
     public int height(Node n){
         if (n == null) return 0;
-        if(n.getLeft() == null && n.getRight() == null){
+        if(n.getLeft() == null && n.getRight() == null) {
             return 1;
-        }else if(n.getRight() == null){
+        } else if(n.getRight() == null) {
             return 1 + height(n.getLeft());
-        }else if(n.getLeft() == null){
+        } else if(n.getLeft() == null) {
             return 1 + height(n.getRight());
-        }else{
+        } else {
             return 1 + height(n.getRight()) + height(n.getLeft());
         }
     }
@@ -38,14 +38,14 @@ public class CoordinateTree {
     }
 
     public void insert(Node n, Node root){
-        if(root.getLeft() == null){
+        if(root.getLeft() == null) {
             root.setLeft(n);
-        }else if(root.getRight() == null){
+        } else if(root.getRight() == null) {
             root.setRight(n);
-        }else{
-            if(height(n.getLeft()) <= height(n.getRight())){
+        } else {
+            if(height(n.getLeft()) <= height(n.getRight())) {
                 insert(n, root.getLeft());
-            }else{
+            } else {
                 insert(n, root.getRight());
             }
         }
@@ -73,10 +73,6 @@ public class CoordinateTree {
          this.data = data;
      }
 
-     public Node getRoot(Node n) {
-         return n.parent == null ? n : getRoot(n.parent);
-     }
-
      public void setLeft(Node left) {
          this.left = left;
          left.setParent(this);
@@ -91,16 +87,8 @@ public class CoordinateTree {
          this.parent = parent;
      }
 
-     public void setData(Coordinate c) {
-         this.data = c;
-     }
-
      public Node getLeft() {
          return left;
-     }
-
-     public Node getParent() {
-         return parent;
      }
 
      public Node getRight() {

@@ -36,7 +36,7 @@ public class InitFrame extends ListenerPanel {
             }
         });
         this.add(generate);
-        this.pack();
+        //this.pack();
         this.setVisible(true);
     }
 }
