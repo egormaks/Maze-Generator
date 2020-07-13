@@ -193,7 +193,6 @@ public class MazeAlgorithms {
                     hasExit = false;
                 }
             }
-            printGrid(setGrid);
         }
         for (int j = 0; j < setGrid[0].length; j++) {
             int k = j + 1;
