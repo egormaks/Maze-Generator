@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Driver extends JFrame {
     private static final int DEFAULT_TEXT_HEIGHT = 10;
-    private static final int NO_ALGOS = 4;
-    private static AnalysisPanel analysisPanel = new AnalysisPanel();
+    public static final int NO_ALGOS = 4;
+    private static AnalysisPanel analysisPanel;
 
     private MazePanel[] mazePanels;
 
@@ -34,8 +34,8 @@ public class Driver extends JFrame {
         analysis.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                analysisPanel = new AnalysisPanel();
                 analysisPanel.setVisible(true);
-                analysisPanel.performAnalysis();
             }
         });
         this.add(analysis);

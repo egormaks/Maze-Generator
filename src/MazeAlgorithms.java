@@ -66,12 +66,20 @@ public class MazeAlgorithms {
     // constant time reassignment??
 
     public static void generateKruskal(int grid[][]) {
-        CoordinateTree setGrid[][] = new CoordinateTree[(grid.length - 1) / 2][(grid.length - 1) / 2];
+        CoordinateTree setGrid[][] = new CoordinateTree[(grid.length - 1) / 2][(grid[0].length - 1) / 2];
         Set<Edge> edges = new HashSet<>();
+
+
+
         for (int i = 0; i < setGrid.length; i++) {
             for (int j = 0; j < setGrid[0].length; j++) {
                 setGrid[i][j] = new CoordinateTree(new Coordinate(1 + 2 * j,1 + 2 * i));
             }
+        }
+
+        if (grid.length == 3 && grid[0].length == 3) {
+            grid[1][1] = 0;
+            return;
         }
 
         for (int i = 1; i < grid.length; i += 2) {
@@ -126,7 +134,7 @@ public class MazeAlgorithms {
     }
 
     public static void generateEller(int grid[][]) {
-        int setGrid[][] = new int[(grid.length - 1) / 2][(grid.length - 1) / 2];
+        int setGrid[][] = new int[(grid.length - 1) / 2][(grid[0].length - 1) / 2];
         int setCounter = 1;
 
         for (int i = 0; i < setGrid.length; i++) {
